@@ -1,5 +1,5 @@
-From 7e024a412331dd6cc3548a7e7209959019fb707c Mon Sep 17 00:00:00 2001
-From: Troy Frew <fuzzy_bot@arenaga.me>
+From 9f641cadaeec788313843c830cc4c2643b183316 Mon Sep 17 00:00:00 2001
+From: Nathan Poirier <nathan@poirier.io>
 Date: Tue, 28 Jun 2016 23:00:49 -0500
 Subject: [PATCH] Improve ServerKickEvent
 
@@ -62,10 +62,10 @@ index 0e1ef5c..ee63732 100644
      @Deprecated
      public String getKickReason()
 diff --git a/proxy/src/main/java/net/md_5/bungee/ServerConnector.java b/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
-index fc627cb..1af7071 100644
+index a37f3ea..5d72a56 100644
 --- a/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
 +++ b/proxy/src/main/java/net/md_5/bungee/ServerConnector.java
-@@ -301,7 +301,7 @@ public class ServerConnector extends PacketHandler
+@@ -307,7 +307,7 @@ public class ServerConnector extends PacketHandler
      public void handle(Kick kick) throws Exception
      {
          ServerInfo def = user.updateAndGetNextServer( target );
@@ -75,17 +75,16 @@ index fc627cb..1af7071 100644
          {
              // Pre cancel the event if we are going to try another server
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java b/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
-index a8e65fa..4177ef5 100644
+index 4768cb4..356cf4f 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/DownstreamBridge.java
-@@ -59,16 +59,19 @@ public class DownstreamBridge extends PacketHandler
+@@ -60,16 +60,19 @@ public class DownstreamBridge extends PacketHandler
              return;
          }
  
--        ServerInfo def = bungee.getServerInfo( con.getPendingConnection().getListener().getFallbackServer() );
--        if ( server.getInfo() != def )
 +        // Waterfall start
-+        ServerInfo def = con.updateAndGetNextServer( server.getInfo() );
+         ServerInfo def = con.updateAndGetNextServer( server.getInfo() );
+-        if ( def != null )
 +        ServerKickEvent event = bungee.getPluginManager().callEvent( new ServerKickEvent( con, server.getInfo(), TextComponent.fromLegacyText( bungee.getTranslation( "server_went_down" ) ), def, ServerKickEvent.State.CONNECTED, ServerKickEvent.Cause.EXCEPTION ) );
 +        if ( event.isCancelled() && event.getCancelServer() != null )
          {
@@ -104,7 +103,7 @@ index a8e65fa..4177ef5 100644
      }
  
      @Override
-@@ -83,7 +86,19 @@ public class DownstreamBridge extends PacketHandler
+@@ -84,7 +87,19 @@ public class DownstreamBridge extends PacketHandler
  
          if ( !server.isObsolete() )
          {
@@ -125,15 +124,19 @@ index a8e65fa..4177ef5 100644
          }
  
          ServerDisconnectEvent serverDisconnectEvent = new ServerDisconnectEvent( con, server.getInfo() );
-@@ -457,7 +472,7 @@ public class DownstreamBridge extends PacketHandler
-         {
-             def = null;
-         }
+@@ -454,7 +469,11 @@ public class DownstreamBridge extends PacketHandler
+     public void handle(Kick kick) throws Exception
+     {
+         ServerInfo def = con.updateAndGetNextServer( server.getInfo() );
 -        ServerKickEvent event = bungee.getPluginManager().callEvent( new ServerKickEvent( con, server.getInfo(), ComponentSerializer.parse( kick.getMessage() ), def, ServerKickEvent.State.CONNECTED ) );
++        if ( Objects.equal( server.getInfo(), def ) )
++        {
++            def = null;
++        }
 +        ServerKickEvent event = bungee.getPluginManager().callEvent( new ServerKickEvent( con, server.getInfo(), ComponentSerializer.parse( kick.getMessage() ), def, ServerKickEvent.State.CONNECTED, ServerKickEvent.Cause.SERVER ) ); // Waterfall
          if ( event.isCancelled() && event.getCancelServer() != null )
          {
              con.connectNow( event.getCancelServer() );
 -- 
-2.7.4
+2.10.0
 

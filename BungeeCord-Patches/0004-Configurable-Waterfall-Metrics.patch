@@ -1,4 +1,4 @@
-From ffbfeb13e1e15f5cbc13839cef04bd407d43e8c1 Mon Sep 17 00:00:00 2001
+From 176eede573861401925dba13a9e76f3fb87a1e85 Mon Sep 17 00:00:00 2001
 From: Techcable <Techcable@techcable.net>
 Date: Thu, 19 May 2016 10:55:20 -0700
 Subject: [PATCH] Configurable Waterfall Metrics
@@ -58,10 +58,10 @@ index 9523987..ae5a2a9 100644
          // Connect to the website
          URLConnection connection;
 diff --git a/proxy/src/main/java/io/github/waterfallmc/waterfall/conf/WaterfallConfiguration.java b/proxy/src/main/java/io/github/waterfallmc/waterfall/conf/WaterfallConfiguration.java
-index 03160da..1fa3ecd 100644
+index 12c5859..692b83e 100644
 --- a/proxy/src/main/java/io/github/waterfallmc/waterfall/conf/WaterfallConfiguration.java
 +++ b/proxy/src/main/java/io/github/waterfallmc/waterfall/conf/WaterfallConfiguration.java
-@@ -10,10 +10,23 @@ import net.md_5.bungee.conf.YamlConfig;
+@@ -9,10 +9,23 @@ import net.md_5.bungee.conf.YamlConfig;
  
  public class WaterfallConfiguration extends Configuration {
  
@@ -85,19 +85,20 @@ index 03160da..1fa3ecd 100644
 +        return metrics;
      }
  }
+\ No newline at end of file
 diff --git a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-index 33c646a..8fd256c 100644
+index 7bb0862..304a794 100644
 --- a/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
 +++ b/proxy/src/main/java/net/md_5/bungee/BungeeCord.java
-@@ -23,6 +23,7 @@ import net.md_5.bungee.scheduler.BungeeScheduler;
- import com.google.common.util.concurrent.ThreadFactoryBuilder;
+@@ -11,6 +11,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  import com.google.gson.Gson;
+ import com.google.gson.GsonBuilder;
  import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 +import io.github.waterfallmc.waterfall.Metrics;
  import io.github.waterfallmc.waterfall.conf.WaterfallConfiguration;
  import io.netty.bootstrap.ServerBootstrap;
  import io.netty.channel.Channel;
-@@ -284,7 +285,9 @@ public class BungeeCord extends ProxyServer
+@@ -289,7 +290,9 @@ public class BungeeCord extends ProxyServer
                  }
              }
          }, 0, TimeUnit.MINUTES.toMillis( 5 ) );
